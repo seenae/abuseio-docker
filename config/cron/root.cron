@@ -1,0 +1,2 @@
+# run this script on boot
+@reboot /scripts/boot.sh

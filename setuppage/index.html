@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AbuseIO setup</title>
+    <script type='text/javascript' src='jquery-3.1.1.min.js'></script>
+    <link rel="stylesheet" href="w3.css">
+    <style>
+        body {
+            background-color: #0083bb;
+        }
+
+        div#logo {
+            width: 240px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+
+        div#container {
+            width: 800px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="data"></div>
+    <div id="container">
+        <div id="logo"><img src="AbuseIOLogo220x220.png"/></div>
+        <div class="w3-light-grey">
+            <div id="progress" class="w3-container w3-gray" style="height:24px;width:1%">1%</div>
+        </div>
+
+        <p id="status"></p>
+
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    function UpdateProgressBar(data) {
+        $("#progress").width(data.percentage + '%');
+        $("#progress").text(data.percentage + '%');
+        $("#status").text(data.status);
+    }
+
+    function GetProgress() {
+        $.get('progress.txt', function ( progress ) {
+            var data = [];
+
+            data['percentage'] = progress.substring(0,progress.indexOf(' '));
+            data['status'] =  progress.substring(progress.indexOf(' ') + 1, progress.length - 1 );
+
+            UpdateProgressBar(data);
+
+            // we the status is done wait another 10 second before we reload the page
+            if (data.status == "Done") {
+                setTimeout(function () {
+                    location.reload(true);
+                }, 10000);
+            }
+        });
+    }
+
+    $( document ).ready(function () {
+        GetProgress();
+        setInterval(function () {
+            GetProgress();
+        }, 10000);
+    });
+</script>
