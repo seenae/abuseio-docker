@@ -1,17 +1,17 @@
-# abuseio-docker
-Docker image for AbuseIO
+# abuseio-docker (WIP)
+Docker image for AbuseIO, still a work in progress
 
-## building the image
+### building the image
     
     docker build -t abuseio:latest .
     
-## running the container
+### running the container
 
     docker run -d -p 8000:8000 abuseio:latest
     
 and connect your browser to http://localhost:8000
 
-## TODO
+### TODO
 
  1. Cleanup / Fix / Document Dockerfile
  2. Add fetchmail/procmail
