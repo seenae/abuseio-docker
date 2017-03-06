@@ -1,6 +1,12 @@
 # Dockerfile for AbuseIO latest
 FROM ubuntu:16.04
 
+LABEL description="Docker image for AbuseIO, this image will install the latest stable AbuseIO release" \
+      vendor="AbuseIO" \
+      product="AbuseIO" \
+      version="latest" \
+      maintainer="joost@abuse.io"
+
 # MYSQL
 ENV MYSQL_ROOT_PASSWORD abuseio
 ENV MYSQL_DATABASE abuseio
@@ -12,9 +18,9 @@ RUN echo "mysql-server mysql-server/root_password_again password ${MYSQL_ROOT_PA
 # Update system and install dependencies
 RUN apt-get update && \
     apt-get upgrade -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install curl mysql-server mysql-client php php-pear php-dev php-mcrypt \
-    php-mysql php-pgsql php-curl php-intl php-bcmath php-cli php-cgi php-fpm php-mbstring php-zip nginx rsyslog \
-    supervisor wget -y
+    DEBIAN_FRONTEND=noninteractive apt-get install curl fetchmail mysql-server mysql-client php php-pear php-dev \
+    php-mcrypt php-mysql php-pgsql php-curl php-intl php-bcmath php-cli php-cgi php-fpm php-mbstring php-zip \
+    procmail nginx rsyslog supervisor wget -y
 
 # create directories
 RUN mkdir -p \
@@ -105,6 +111,12 @@ RUN sed -i \
     -e 's/$PrivDropToGroup/#$PrivDropToGroup/g' \
     /etc/rsyslog.conf
 
+# tweak mysql, comment out a few problematic configuration values and
+# don't reverse lookup hostnames
+RUN sed -i \
+    -E 's/^(bind-address|log)/#&/' /etc/mysql/mysql.conf.d/mysqld.cnf && \
+	echo "[mysqld]\nskip-host-cache\nskip-name-resolve" > /etc/mysql/conf.d/docker.cnf
+
 # install mailparse
 RUN pecl install mailparse-3.0.2 && \
     echo extension=mailparse.so > /etc/php/7.0/mods-available/mailparse.ini && \
@@ -129,13 +141,8 @@ RUN sed -i \
     /opt/abuseio/.env.example
 
 # expose volumes and ports
-
-VOLUME /config
-VOLUME /var/log/abuseio
-VOLUME /opt/abuseio/storage
-
-EXPOSE 8000
-EXPOSE 3306
+VOLUME /config /opt/abuseio/storage/mailarchive /var/log/abuseio
+EXPOSE 8000 3306
 
 USER root
 CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]

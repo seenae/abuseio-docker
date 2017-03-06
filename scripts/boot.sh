@@ -80,6 +80,12 @@ else
     sleep 10;
     mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD create $MYSQL_DATABASE
 
+    #create a root user which can be used from the host
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE USER 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD'"
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION"
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "FLUSH PRIVILEGES"
+
+
     echo "80 Migrating initial AbuseIO database" > $PROGRESS
 
     # abuseio migrate
