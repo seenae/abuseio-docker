@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>AbuseIO setup</title>
     <script type='text/javascript' src='jquery-3.1.1.min.js'></script>
     <link rel="stylesheet" href="w3.css">
@@ -15,57 +16,94 @@
             margin: 0 auto;
             padding: 10px;
         }
-
-
-        div#container {
-            width: 800px;
-            margin: 0 auto;
-        }
     </style>
 </head>
 <body>
-    <div id="data"></div>
-    <div id="container">
-        <div id="logo"><img src="AbuseIOLogo220x220.png"/></div>
-        <div class="w3-light-grey">
-            <div id="progress" class="w3-container w3-gray" style="height:24px;width:1%">1%</div>
+<div class="w3-container">
+    <div id="modal" class="w3-modal">
+        <div class="w3-modal-content w3-animate-top w3-card-8">
+            <header class="w3-container w3-blue">
+                <h3>AbuseIO credentials</h3>
+            </header>
+            <div class="w3-container">
+                <p>
+                    E-mail: <span id="login"></span><br/>
+                    Password: <span id="password"></span>
+                </p>
+                <button id="closebutton" class="w3-button">Close and reload</button>
+                <p/>
+            </div>
         </div>
-
-        <p id="status"></p>
-
     </div>
+    <div class="w3-row">
+        <div class="w3-container w3-quarter">
+        </div>
+        <div class="w3-container w3-half">
+            <div id="logo"><img src="AbuseIOLogo220x220.png"/></div>
+            <div class="w3-light-grey">
+                <div id="progress" class="w3-container w3-gray" style="height:24px;width:1%">1%</div>
+            </div>
+            <p id="status"></p>
+        </div>
+        <div class="w3-container w3-quarter">
+        </div>
+    </div>
+</div>
 </body>
 </html>
 
 <script type="text/javascript">
-    function UpdateProgressBar(data) {
-        $("#progress").width(data.percentage + '%');
-        $("#progress").text(data.percentage + '%');
-        $("#status").text(data.status);
+    var myInterval;
+
+    function BrowserReload() {
+        console.log("Reloading browser in 10 seconds");
+        setTimeout(function () {
+            location.reload(true);
+        }, 10000);
     }
 
-    function GetProgress() {
-        $.get('progress.txt', function ( progress ) {
-            var data = [];
-
-            data['percentage'] = progress.substring(0,progress.indexOf(' '));
-            data['status'] =  progress.substring(progress.indexOf(' ') + 1, progress.length - 1 );
-
-            UpdateProgressBar(data);
-
-            // we the status is done wait another 10 second before we reload the page
-            if (data.status == "Done") {
-                setTimeout(function () {
-                    location.reload(true);
-                }, 10000);
-            }
+    function RestartSupervisor() {
+        $.post('status.php', {
+            restart: true
+        }, function(data) {
+           console.log("Successfull requested restart")
         });
     }
 
-    $( document ).ready(function () {
-        GetProgress();
-        setInterval(function () {
-            GetProgress();
+    function UpdateStatus(data) {
+        $("#progress").width(data.percentage + '%');
+        $("#progress").text(data.percentage + '%');
+        $("#status").text(data.message);
+        $("#login").text(data.login);
+        $("#password").text(data.password);
+
+        // if the status is finished, show the credentials
+        if (data.finished == true) {
+            clearInterval(myInterval);
+            if (data.configured) {
+                RestartSupervisor();
+                BrowserReload();
+            } else {
+                $("#modal").show();
+            }
+        }
+    }
+
+    function GetStatus() {
+        $.get('status.php', function (status) {
+            UpdateStatus(JSON.parse(status));
+        });
+    }
+
+    $(document).ready(function () {
+        GetStatus();
+        myInterval = setInterval(function () {
+            GetStatus();
         }, 10000);
+        $("#closebutton").click(function () {
+            $('#modal').hide();
+            RestartSupervisor();
+            BrowserReload();
+        })
     });
 </script>
