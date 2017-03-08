@@ -7,13 +7,13 @@ Standalone docker image for AbuseIO on NGINX with MySQL, fetchmail and procmail
     
 ### running the container
 
-    # docker run -d -p 8000:8000 -p 3306:3306 -v <config_dir>:/config abuseio:latest
+    # docker run -d -p 8000:8000 -p 3306:3306 -v <host_config_dir>:/config abuseio:latest
     
 and connect your browser to [http://localhost:8000/](http://localhost:8000/)
 
 ### config the container
 Fetchmail `fetchmailrc` and AbuseIO environment settings `abuseio.env` can be editted in the `/config` directory on the container or in the directory on the host that is bound to it.
-These contains for example incoming `fetchmailrc` and outgoing `abuseio.env` mail settings.
+These contain, for example, incoming `fetchmailrc` and outgoing `abuseio.env` mail settings.
 The `/config` also contains the AbuseIO config directory, here you can edit advanced settings e.g. parser and collector settings.
 
  - [AbuseIO environment settings](https://docs.abuse.io/en/latest/installation/#environment-settings)
