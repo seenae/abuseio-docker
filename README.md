@@ -35,16 +35,16 @@ of the Docker Manual.
 ### volumes
 The container exports four volumes
 
- - /config
+ - `/config`
    all the necessary files to config AbuseIO e.g. mail credentials 
    
- - /opt/abuseio/storage/mailarchive
+ - `/opt/abuseio/storage/mailarchive`
    the received mails
  
- - /var/log/abuseio
+ - `/var/log/abuseio`
    logging from AbuseIO, NGINX and procmail
    
- - /var/lib/mysql
+ - `/var/lib/mysql`
    database data
  
 The volumes can be mapped to local persistent storage, using the -v option of Docker, see [mount volume](https://docs.docker.com/engine/reference/commandline/run/#mount-volume--v---read-only) of the Docker manual for more information
