@@ -60,13 +60,10 @@ RUN phpenmod docker-vars
 
 # install rsyslog
 ADD config/rsyslog/48-abuseio.conf /etc/rsyslog.d
+ADD config/rsyslog/46-fetchmail.conf /etc/rsyslog.d
 
 # install supervisor confs
-ADD config/supervisor/nginx.conf /etc/supervisor/conf.d
-ADD config/supervisor/php-fpm.conf /etc/supervisor/conf.d
-ADD config/supervisor/rsyslog.conf /etc/supervisor/conf.d
-ADD config/supervisor/cron.conf /etc/supervisor/conf.d
-ADD config/supervisor/mysql.conf /etc/supervisor/conf.d
+ADD config/supervisor/docker.conf /etc/supervisor/conf.d
 
 # install boot script
 ADD scripts/boot.sh /scripts
@@ -74,9 +71,14 @@ RUN chmod 755 /scripts/boot.sh
 
 # install crons
 ADD config/cron/root.cron /tmp
-ADD config/cron/abuseio.cron /tmp
 RUN crontab -u root /tmp/root.cron
-#RUN crontab -u abuseio /tmp/abuseio.cron
+
+# install fetchmailrc
+ADD config/fetchmail/fetchmailrc /etc
+RUN chmod 0600 /etc/fetchmailrc
+
+# install procmailrc
+ADD config/procmail/procmailrc /etc
 
 # switch to /tmp
 WORKDIR /tmp
@@ -141,8 +143,11 @@ RUN sed -i \
     /opt/abuseio/.env.example
 
 # expose volumes and ports
-VOLUME /config /opt/abuseio/storage/mailarchive /var/log/abuseio
+VOLUME /config /opt/abuseio/storage/mailarchive /var/lib/mysql /var/log/abuseio
 EXPOSE 8000 3306
 
+# set working dir and user
+WORKDIR /opt/abuseio
 USER root
+
 CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]

@@ -7,6 +7,8 @@ ABUSEIO_CONF_NEW=/opt/abuseio/config_new
 ABUSEIO_ENV=/config/abuseio.env
 ABUSEIO_ENV_EX=/opt/abuseio/.env.example
 ABUSEIO_ENV_ORG=/opt/abuseio/.env
+FETCHMAIL_CONF_ORG=/etc/fetchmailrc
+FETCHMAIL_CONF=/config/fetchmailrc
 PROGRESSFILE=/opt/setup/progress.txt
 PASSWORDFILE=/opt/setup/password.txt
 RESTARTFILE=/opt/setup/restart.txt
@@ -53,17 +55,7 @@ else
 
     # copy abuseio config
     # remove old configuration if it exists
-    rm -rf $ABUSEIO_ENV
     rm -rf $ABUSEIO_CONF
-
-    echo "40 copying AbuseIO environment" > $PROGRESSFILE
-
-    # copy and link the env
-    cp $ABUSEIO_ENV_EX $ABUSEIO_ENV
-    if [ ! -h "$ABUSEIO_ENV_ORG" ]
-    then
-       ln -s $ABUSEIO_ENV $ABUSEIO_ENV_ORG
-    fi
 
     if [ ! -h "$ABUSEIO_CONF_ORG" ]
     then
@@ -72,6 +64,25 @@ else
         cp -R $ABUSEIO_CONF_NEW $ABUSEIO_CONF
         ln -s $ABUSEIO_CONF $ABUSEIO_CONF_ORG
     fi
+
+    echo "30 copying AbuseIO environment" > $PROGRESSFILE
+    # remove old configuration if it exists
+    rm -rf $ABUSEIO_ENV
+
+    # copy and link the env
+    cp $ABUSEIO_ENV_EX $ABUSEIO_ENV
+    if [ ! -h "$ABUSEIO_ENV_ORG" ]
+    then
+       ln -s $ABUSEIO_ENV $ABUSEIO_ENV_ORG
+    fi
+
+    echo "40 copying fetchmailrc" > $PROGRESSFILE
+
+    # copy fetchmailrc
+    # remove old configuration if it exists
+    rm -rf $FETCHMAIL_CONF
+    cp $FETCHMAIL_CONF_ORG $FETCHMAIL_CONF
+    chmod 0600 $FETCHMAIL_CONF
 
     echo "60 Initializing AbuseIO database" > $PROGRESSFILE
 
