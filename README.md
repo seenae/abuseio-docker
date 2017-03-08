@@ -1,31 +1,34 @@
-# abuseio-docker
-Standalone docker image for AbuseIO on NGINX with MySQL, fetchmail and procmail
+# abuse-docker
+Standalone image for [AbuseIO](http://abuse.io) running on NGINX with MySQL, fetchmail and procmail
 
-### building the image
-    
+### to build
+
     # docker build -t abuseio:latest .
-    
-### running the container
+
+### to run
 
     # docker run -d -p 8000:8000 -p 3306:3306 -v <host_config_dir>:/config abuseio:latest
     
 and connect your browser to [http://localhost:8000/](http://localhost:8000/)
 
-### config the container
-Fetchmail `fetchmailrc` and AbuseIO environment settings `abuseio.env` can be editted in the `/config` directory on the container or in the directory on the host that is bound to it.
-These contain, for example, incoming `fetchmailrc` and outgoing `abuseio.env` mail settings.
-The `/config` also contains the AbuseIO config directory, here you can edit advanced settings e.g. parser and collector settings.
+### configuration
+During the first boot of the container, AbuseIO will create an admin account and setup a default AbuseIO instance. The credentials, for the admin account, will be shown during this setup.
+
+The  `/config`  volume,  contains the basic settings for AbuseIO, most of them are set to default values.
+
+Mail settings can be set in `fetchmailrc` \( incoming \) and `abuseio.env` \( outgoing \)  for more information about these file see the links below. When you edit fetchmailrc, don't delete or alter the last line.
+    
+    mda "/usr/bin/procmail -m /etc/procmailrc"
+    
+This line ensures that the mails are delivered to AbuseIO.
+
+
+Others setting for  e.g. parsers, collectors and  find-contact modules can be found in the `/config/abuseio` directory.
 
  - [AbuseIO environment settings](https://docs.abuse.io/en/latest/installation/#environment-settings)
  - [AbuseIO main configuration](https://docs.abuse.io/en/latest/configuration_main/)
  - [Gmail POP3 with fetchmail](https://www.axllent.org/docs/view/gmail-pop3-with-fetchmail/)
  - [Using Fetchmail to Retrieve Email](https://www.linode.com/docs/email/clients/using-fetchmail-to-retrieve-email)
- 
-When you edit fetchmailrc, don't delete or alter the last line.
-    
-    mda "/usr/bin/procmail -m /etc/procmailrc"
-    
-This line ensures that the mails are delivered to AbuseIO.
 
 ### ports
 NGINX is accessible on container port 8000 and MySQL is accessible on port 3306. These ports can be published 
