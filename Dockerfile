@@ -25,6 +25,8 @@ RUN apt-get update && \
 # create directories
 RUN mkdir -p \
     /config \
+    /data \
+    /log \
     /opt \
     /opt/setup \
     /var/log/abuseio \
@@ -41,6 +43,8 @@ RUN adduser --system --group --home /opt/abuseio abuseio && \
 RUN chmod 775 /var/log/abuseio && \
     chown root:abuseio /var/log/abuseio && \
     chown mysql:mysql /var/run/mysqld && \
+    chown root:abuseio /log && \
+    chmod 775 /data && \
     chown www-data:www-data /opt/setup
 
 # install the setuppage
@@ -143,7 +147,7 @@ RUN sed -i \
     /opt/abuseio/.env.example
 
 # expose volumes and ports
-VOLUME /config /opt/abuseio/storage/mailarchive /var/lib/mysql /var/log/abuseio
+VOLUME /config /data /log
 EXPOSE 8000 3306
 
 # set working dir and user

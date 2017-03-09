@@ -7,7 +7,7 @@ Standalone image for [AbuseIO](http://abuse.io) running on NGINX with MySQL, fet
 
 ### to run
 
-    # docker run -d -p 8000:8000 -p 3306:3306 -v <host_config_dir>:/config abuseio:latest
+    # docker run -d -p 8000:8000 -p 3306:3306 -v <host_config_dir>:/config -v <host_data_dir>:/data -v <host_log_dir>:/log abuseio:latest
     
 and connect your browser to [http://localhost:8000/](http://localhost:8000/)
 
@@ -36,19 +36,17 @@ on the host by using the -p option of Docker, see [incoming ports](https://docs.
 of the Docker Manual.
 
 ### volumes
-The container exports four volumes
+The container exports three volumes
 
  - `/config`
    all the necessary files to config AbuseIO e.g. mail credentials 
    
- - `/opt/abuseio/storage/mailarchive`
-   the received mails
- 
- - `/var/log/abuseio`
+ - `/data`
+   persistent data: database and mailarchive
+
+ - `/log`
    logging from AbuseIO, NGINX and procmail
    
- - `/var/lib/mysql`
-   database data
  
 The volumes can be mapped to local persistent storage, using the -v option of Docker, see [mount volume](https://docs.docker.com/engine/reference/commandline/run/#mount-volume--v---read-only) of the Docker manual for more information
 

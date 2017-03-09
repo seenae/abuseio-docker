@@ -7,8 +7,20 @@ ABUSEIO_CONF_NEW=/opt/abuseio/config_new
 ABUSEIO_ENV=/config/abuseio.env
 ABUSEIO_ENV_EX=/opt/abuseio/.env.example
 ABUSEIO_ENV_ORG=/opt/abuseio/.env
+
+ABUSEIO_MAILARCHIVE_ORG=/opt/abuseio/storage/mailarchive
+ABUSEIO_MAILARCHIVE=/data/mailarchive
+
+ABUSEIO_LOG_ORG=/var/log/abuseio
+ABUSEIO_LOG=/log
+
+MYSQL_DB_ORG=/var/lib/mysql
+MYSQL_DB_NEW=/var/lib/mysql_new
+MYSQL_DB=/data/mysql
+
 FETCHMAIL_CONF_ORG=/etc/fetchmailrc
 FETCHMAIL_CONF=/config/fetchmailrc
+
 PROGRESSFILE=/opt/setup/progress.txt
 PASSWORDFILE=/opt/setup/password.txt
 RESTARTFILE=/opt/setup/restart.txt
@@ -23,7 +35,7 @@ ABUSEIO_ADMIN_PASSWORD=`date | md5sum | cut -c2-9`
 if [ -f "$CONFIGURED" ]
 then
 
-    echo "30 checking AbuseIO config" > $PROGRESSFILE
+    echo "20 checking AbuseIO config" > $PROGRESSFILE
 
     # check to see if the config is linked
     if [ ! -h "$ABUSEIO_CONF_ORG" ]
@@ -33,7 +45,14 @@ then
         ln -s $ABUSEIO_CONF $ABUSEIO_CONF_ORG
     fi
 
-    echo "60 checking AbuseIO environment" > $PROGRESSFILE
+    # check if the mailarchive is linked
+    if [ ! -h "$ABUSEIO_MAILARCHIVE_ORG" ]
+    then
+        rm -rf $ABUSEIO_MAILARCHIVE_ORG
+        ln -s $ABUSEIO_MAILARCHIVE $ABUSEIO_MAILARCHIVE_ORG
+    fi
+
+    echo "40 Checking AbuseIO environment" > $PROGRESSFILE
 
     # check to see if the env is linked
     if [ ! -h "$ABUSEIO_ENV_ORG" ]
@@ -41,8 +60,39 @@ then
         ln -s $ABUSEIO_ENV $ABUSEIO_ENV_ORG
     fi
 
+    echo "60 Checking databases"
+
+    # check if the database directory is linked
+    supervisorctl stop mysqld
+
+    if [ ! -h "$MYSQL_DB_ORG" ]
+    then
+        if [ ! -d "$MYSQL_DB_NEW" ]
+        then
+            mv $MYSQL_DB_ORG $MYSQL_DB_NEW
+        else
+            rm -rf $MYSQL_DB_ORG
+        fi
+        ln -s $MYSQL_DB $MYSQL_DB_ORG
+    fi
+
+    supervisorctl start mysqld
+
+    echo "80 Checking log directory" > $PROGRESSFILE
+
+    # check if the log directory is linked
+    supervisorctl stop rsyslog
+
+    if [ ! -h "$ABUSEIO_LOG_ORG" ]
+    then
+        rm -rf $ABUSEIO_LOG_ORG
+        ln -s $ABUSEIO_LOG $ABUSEIO_LOG_ORG
+    fi
+    supervisorctl start rsyslog
+
+
     # switching to abuseio
-    echo "95 Enabling AbuseIO" > $PROGRESSFILE
+    echo "90 Enabling AbuseIO" > $PROGRESSFILE
 
     rm /etc/nginx/sites-enabled/setup.conf
     ln -s /etc/nginx/sites-available/abuseio.conf /etc/nginx/sites-enabled/abuseio.conf
@@ -51,7 +101,7 @@ then
 
 else
 
-    echo "20 copying AbuseIO config" > $PROGRESSFILE
+    echo "10 copying AbuseIO config" > $PROGRESSFILE
 
     # copy abuseio config
     # remove old configuration if it exists
@@ -61,22 +111,31 @@ else
     then
         rm -rf $ABUSEIO_CONF_NEW
         mv $ABUSEIO_CONF_ORG $ABUSEIO_CONF_NEW
-        cp -R $ABUSEIO_CONF_NEW $ABUSEIO_CONF
+        cp -ra --preserve=all $ABUSEIO_CONF_NEW $ABUSEIO_CONF
         ln -s $ABUSEIO_CONF $ABUSEIO_CONF_ORG
     fi
 
-    echo "30 copying AbuseIO environment" > $PROGRESSFILE
+    # link the mailarchive to /data
+    if [ ! -h "$ABUSEIO_MAILARCHIVE_ORG" ]
+    then
+        cp -ra --preserve=all $ABUSEIO_MAILARCHIVE_ORG $ABUSEIO_MAILARCHIVE
+        rm -rf $ABUSEIO_MAILARCHIVE_ORG
+        ln -s $ABUSEIO_MAILARCHIVE $ABUSEIO_MAILARCHIVE_ORG
+    fi
+
+    echo "20 copying AbuseIO environment" > $PROGRESSFILE
     # remove old configuration if it exists
     rm -rf $ABUSEIO_ENV
 
     # copy and link the env
     cp $ABUSEIO_ENV_EX $ABUSEIO_ENV
+    chown abuseio:abuseio $ABUSEIO_ENV
     if [ ! -h "$ABUSEIO_ENV_ORG" ]
     then
        ln -s $ABUSEIO_ENV $ABUSEIO_ENV_ORG
     fi
 
-    echo "40 copying fetchmailrc" > $PROGRESSFILE
+    echo "30 copying fetchmailrc" > $PROGRESSFILE
 
     # copy fetchmailrc
     # remove old configuration if it exists
@@ -84,11 +143,28 @@ else
     cp $FETCHMAIL_CONF_ORG $FETCHMAIL_CONF
     chmod 0600 $FETCHMAIL_CONF
 
-    echo "60 Initializing AbuseIO database" > $PROGRESSFILE
+    echo "40 Initializing AbuseIO database" > $PROGRESSFILE
+
+    supervisorctl stop mysqld
+
+    # link the db directory
+    if [ ! -h "$MYSQL_DB_ORG" ]
+    then
+        if [ ! -d "$MYSQL_DB_NEW" ]
+        then
+            mv $MYSQL_DB_ORG $MYSQL_DB_NEW
+        else
+            rm -rf $MYSQL_DB_ORG
+        fi
+        cp -ra --preserve=all $MYSQL_DB_NEW $MYSQL_DB
+        ln -s $MYSQL_DB $MYSQL_DB_ORG
+    fi
+
+    supervisorctl start mysqld
 
     # initialize database
     # wait a while, to make sure mysql is up and running
-    sleep 30;
+    sleep 20;
     mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD create $MYSQL_DATABASE
 
     #create a root user which can be used from the host
@@ -96,13 +172,13 @@ else
     mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION"
     mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "FLUSH PRIVILEGES"
 
-    echo "80 Migrating initial AbuseIO database" > $PROGRESSFILE
+    echo "50 Migrating initial AbuseIO database" > $PROGRESSFILE
 
     # abuseio migrate
     cd /opt/abuseio
     php ./artisan migrate --force
 
-    echo "90 Creating System Administrator user" > $PROGRESSFILE
+    echo "60 Creating System Administrator user" > $PROGRESSFILE
 
     # create admin user
     php ./artisan user:create admin@isp.local $ABUSEIO_ADMIN_PASSWORD system administrator en Default
@@ -111,8 +187,22 @@ else
     # add the admin role to the user
     php ./artisan role:assign --role=Admin --user=1
 
+    echo "70 Linking log directory" > $PROGRESSFILE
+
+    # check if the log directory is linked
+    supervisorctl stop rsyslog
+
+    if [ ! -h "$ABUSEIO_LOG_ORG" ]
+    then
+        cp -ra --preserve=all $ABUSEIO_LOG_ORG/* $ABUSEIO_LOG
+        rm -rf $ABUSEIO_LOG_ORG
+        ln -s $ABUSEIO_LOG $ABUSEIO_LOG_ORG
+    fi
+
+    supervisorctl start rsyslog
+
     # switching to abuseio
-    echo "95 Enabling AbuseIO" > $PROGRESSFILE
+    echo "80 Enabling AbuseIO" > $PROGRESSFILE
 
     rm /etc/nginx/sites-enabled/setup.conf
     ln -s /etc/nginx/sites-available/abuseio.conf /etc/nginx/sites-enabled/abuseio.conf
