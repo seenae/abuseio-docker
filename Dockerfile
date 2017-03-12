@@ -17,7 +17,6 @@ RUN echo "mysql-server mysql-server/root_password_again password ${MYSQL_ROOT_PA
 
 # Update system and install dependencies
 RUN apt-get update && \
-    apt-get upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install curl fetchmail mysql-server mysql-client php php-pear php-dev \
     php-mcrypt php-mysql php-pgsql php-curl php-intl php-bcmath php-cli php-cgi php-fpm php-mbstring php-zip \
     procmail nginx rsyslog supervisor wget -y
@@ -128,15 +127,14 @@ RUN pecl install mailparse-3.0.2 && \
     echo extension=mailparse.so > /etc/php/7.0/mods-available/mailparse.ini && \
     phpenmod mailparse && phpenmod mcrypt
 
-# download AbuseIO
-RUN wget https://packages.abuse.io/releases/abuseio-latest.tar.gz
-
-# install AbuseIO
+# install AbuseIO and cleanup after
 WORKDIR /opt
 USER abuseio
-RUN tar xvzf /tmp/abuseio-latest.tar.gz && \
+RUN wget -O /tmp/abuseio-latest.tar.gz https://packages.abuse.io/releases/abuseio-latest.tar.gz && \
+    tar xvzf /tmp/abuseio-latest.tar.gz && \
     chmod -R 770 abuseio/storage/ && \
-    chmod -R 770 abuseio/bootstrap/cache/
+    chmod -R 770 abuseio/bootstrap/cache/ && \
+    rm /tmp/abuseio-latest.tar.gz
 
 # generate abuseio APP_KEY, APP_ID, update DB_DATABASE and DB_PASSWORD
 RUN sed -i \
