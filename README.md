@@ -11,6 +11,14 @@ Standalone image for [AbuseIO](http://abuse.io) running on NGINX with MySQL, fet
     
 and connect your browser to [http://localhost:8000/](http://localhost:8000/)
 
+### to update
+
+It's recommended to pull the new image and create a new container, however you can update to a newer AbuseIO by running the update script in the container 
+
+    # docker exec -t -i <container_id> /scripts/update_abuseio.sh
+
+After the update (in the container or a new container) you should check if your config still works.
+
 ### configuration
 During the first boot of the container, AbuseIO will create an admin account and setup a default AbuseIO instance. The credentials, for the admin account, will be shown during this setup.
 
@@ -49,8 +57,3 @@ The container exports three volumes
    
  
 The volumes can be mapped to local persistent storage, using the -v option of Docker, see [mount volume](https://docs.docker.com/engine/reference/commandline/run/#mount-volume--v---read-only) of the Docker manual for more information
-
-### TODO
-
- 1. Cleanup / Fix / Document Dockerfile
- 

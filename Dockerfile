@@ -72,6 +72,10 @@ ADD config/supervisor/docker.conf /etc/supervisor/conf.d
 ADD scripts/boot.sh /scripts
 RUN chmod 755 /scripts/boot.sh
 
+# install update script
+ADD scripts/update_abuseio.sh /scripts
+RUN chmod 755 /scripts/update_abuseio.sh
+
 # install crons
 ADD config/cron/root.cron /tmp
 RUN crontab -u root /tmp/root.cron
