@@ -25,8 +25,8 @@ PROGRESSFILE=/opt/setup/progress.txt
 PASSWORDFILE=/opt/setup/password.txt
 RESTARTFILE=/opt/setup/restart.txt
 
-MYSQL_DATABASE=`sed -n -e '/DB_DATABASE/ s/.*\= *//p' $ABUSEIO_ENV_EX`
-MYSQL_ROOT_PASSWORD=`sed -n -e '/DB_PASSWORD/ s/.*\= *//p' $ABUSEIO_ENV_EX`
+MYSQL_DATABASE=`sed -n -e '/^DB_DATABASE/ s/.*\= *//p' $ABUSEIO_ENV_EX`
+MYSQL_ROOT_PASSWORD=`sed -n -e '/^DB_PASSWORD/ s/.*\= *//p' $ABUSEIO_ENV_EX`
 
 ABUSEIO_ADMIN_PASSWORD=`date | md5sum | cut -c2-9`
 
@@ -164,7 +164,7 @@ else
 
     # initialize database
     # wait a while, to make sure mysql is up and running
-    sleep 20;
+    sleep 20
     mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD create $MYSQL_DATABASE
 
     #create a root user which can be used from the host
@@ -178,10 +178,10 @@ else
     cd /opt/abuseio
     php ./artisan migrate --force
 
-    echo "60 Creating System Administrator user" > $PROGRESSFILE
+    echo "60 Updating System Administrator user" > $PROGRESSFILE
 
     # create admin user
-    php ./artisan user:create admin@isp.local $ABUSEIO_ADMIN_PASSWORD system administrator en Default
+    php ./artisan user:edit 1 --password=$ABUSEIO_ADMIN_PASSWORD
     echo $ABUSEIO_ADMIN_PASSWORD > $PASSWORDFILE
 
     # add the admin role to the user

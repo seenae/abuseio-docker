@@ -1,23 +1,20 @@
 # abuse-docker
-Standalone image for [AbuseIO](http://abuse.io) running on NGINX with MySQL, fetchmail and procmail
+Standalone image for [AbuseIO 4.1](https://github.com/AbuseIO/AbuseIO/tree/4.1) running on NGINX with MySQL, fetchmail and procmail
 
 ### to build
+The image uses composer and GitHub to retrieve its dependencies, you'll need to have a GitHub OATH token to retrieve them, you can get a OATH token on your GitHub profile. [GitHub Tokens](https://github.com/settings/tokens).
 
-    # docker build -t abuseio:latest .
+    # docker build -t abuseio:4.1 --build-arg GITHUB_TOKEN=<my token> .
 
 ### to run
 
-    # docker run -d -p 8000:8000 -p 3306:3306 -v <host_config_dir>:/config -v <host_data_dir>:/data -v <host_log_dir>:/log abuseio:latest
+    # docker run -d -p 8000:8000 -p 3306:3306 -v <host_config_dir>:/config -v <host_data_dir>:/data -v <host_log_dir>:/log abuseio:4.1
     
 and connect your browser to [http://localhost:8000/](http://localhost:8000/)
 
 ### to update
 
-It's recommended to pull the new image and create a new container, however you can update to a newer AbuseIO by running the update script in the container 
-
-    # docker exec -t -i <container_id> /scripts/update_abuseio.sh
-
-After the update (in the container or a new container) you should check if your config still works.
+Pull a new image and create a new container with the old volumes. After the update you should check if your config still works.
 
 ### configuration
 During the first boot of the container, AbuseIO will create an admin account and setup a default AbuseIO instance. The credentials, for the admin account, will be shown during this setup.

@@ -1,2 +1,2 @@
 # run this script on boot
-@reboot /scripts/boot.sh
+@reboot /scripts/boot.sh > /scripts/boot.log
