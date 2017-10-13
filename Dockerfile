@@ -62,9 +62,9 @@ RUN echo "mysql-server mysql-server/root_password_again password ${MYSQL_ROOT_PA
 
 # Update system and install dependencies
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install curl fetchmail mysql-server mysql-client php php-pear php-dev \
+    DEBIAN_FRONTEND=noninteractive apt-get install curl mysql-server mysql-client php php-pear php-dev \
     php-mcrypt php-mysql php-pgsql php-curl php-intl php-bcmath php-cli php-cgi php-fpm php-mbstring php-zip \
-    procmail nginx rsyslog supervisor -y
+    nginx rsyslog supervisor -y
 
 # create directories
 RUN mkdir -p \
@@ -108,7 +108,6 @@ RUN phpenmod docker-vars
 
 # install rsyslog
 ADD config/rsyslog/48-abuseio.conf /etc/rsyslog.d
-ADD config/rsyslog/46-fetchmail.conf /etc/rsyslog.d
 
 # install supervisor confs
 ADD config/supervisor/docker.conf /etc/supervisor/conf.d
@@ -120,13 +119,6 @@ RUN chmod 755 /scripts/boot.sh
 # install crons
 ADD config/cron/root.cron /tmp
 RUN crontab -u root /tmp/root.cron
-
-# install fetchmailrc
-ADD config/fetchmail/fetchmailrc /etc
-RUN chmod 0600 /etc/fetchmailrc
-
-# install procmailrc
-ADD config/procmail/procmailrc /etc
 
 # switch to /tmp
 WORKDIR /tmp

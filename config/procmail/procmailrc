@@ -1,7 +1,0 @@
-PATH=$HOME/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin
-MAILDIR=/opt/abuseio
-LOGFILE=/log/abuseio/procmail.log
-VERBOSE=yes
-
-:0
-|php artisan email:receive

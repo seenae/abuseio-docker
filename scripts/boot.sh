@@ -18,9 +18,6 @@ MYSQL_DB_ORG=/var/lib/mysql
 MYSQL_DB_NEW=/var/lib/mysql_new
 MYSQL_DB=/data/mysql
 
-FETCHMAIL_CONF_ORG=/etc/fetchmailrc
-FETCHMAIL_CONF=/config/fetchmailrc
-
 PROGRESSFILE=/opt/setup/progress.txt
 PASSWORDFILE=/opt/setup/password.txt
 RESTARTFILE=/opt/setup/restart.txt
@@ -135,14 +132,6 @@ else
        ln -s $ABUSEIO_ENV $ABUSEIO_ENV_ORG
     fi
 
-    echo "30 copying fetchmailrc" > $PROGRESSFILE
-
-    # copy fetchmailrc
-    # remove old configuration if it exists
-    rm -rf $FETCHMAIL_CONF
-    cp $FETCHMAIL_CONF_ORG $FETCHMAIL_CONF
-    chmod 0600 $FETCHMAIL_CONF
-
     echo "40 Initializing AbuseIO database" > $PROGRESSFILE
 
     supervisorctl stop mysqld
@@ -167,7 +156,7 @@ else
     sleep 20
     mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD create $MYSQL_DATABASE
 
-    #create a root user which can be used from the host
+    # create a root user which can be used from the host
     mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE USER 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD'"
     mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION"
     mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "FLUSH PRIVILEGES"
