@@ -8,7 +8,7 @@ The image uses composer and GitHub to retrieve its dependencies, you'll need to 
 
 ### to run
 
-    # docker run -d -p 8000:8000 -p 3306:3306 -v <host_config_dir>:/config -v <host_data_dir>:/data -v <host_log_dir>:/log abuseio:4.1
+    # docker run -d -p 8000:8000 -p 3306:3306 -e "APP_URL=http://localhost:8000" -v <host_config_dir>:/config -v <host_data_dir>:/data -v <host_log_dir>:/log abuseio:4.1
     
 and connect your browser to [http://localhost:8000/](http://localhost:8000/)
 
