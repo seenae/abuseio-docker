@@ -177,6 +177,7 @@ RUN chmod -R 770 storage/ && \
 RUN sed -i \
     -e "s/APP_KEY=SomeRandomString/APP_KEY=`date +%D%T%N | md5sum | cut -d' ' -f1`/g" \
     -e "s/APP_ID=DEFAULT/APP_ID=`date +%N%D%T | md5sum | cut -d' ' -f1`/g" \
+    -e "s;APP_URL='http://localhost/';APP_URL=;g" \
     -e "s/DB_DATABASE=abuseio/DB_DATABASE=${MYSQL_DATABASE}/g" \
     -e "s/DB_PASSWORD=/DB_PASSWORD=${MYSQL_ROOT_PASSWORD}/g" \
     /opt/abuseio/.env.example
