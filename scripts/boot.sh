@@ -25,8 +25,8 @@ PROGRESSFILE=/opt/setup/progress.txt
 PASSWORDFILE=/opt/setup/password.txt
 RESTARTFILE=/opt/setup/restart.txt
 
-MYSQL_DATABASE=`sed -n -e '/DB_DATABASE/ s/.*\= *//p' $ABUSEIO_ENV_EX`
-MYSQL_ROOT_PASSWORD=`sed -n -e '/DB_PASSWORD/ s/.*\= *//p' $ABUSEIO_ENV_EX`
+MYSQL_DATABASE=`sed -n -e '/^DB_DATABASE/ s/.*\= *//p' $ABUSEIO_ENV_EX`
+MYSQL_ROOT_PASSWORD=`sed -n -e '/^DB_PASSWORD/ s/.*\= *//p' $ABUSEIO_ENV_EX`
 
 ABUSEIO_ADMIN_PASSWORD=`date | md5sum | cut -c2-9`
 
@@ -181,7 +181,7 @@ else
     echo "60 Creating System Administrator user" > $PROGRESSFILE
 
     # create admin user
-    php ./artisan user:create admin@isp.local $ABUSEIO_ADMIN_PASSWORD system administrator en Default
+    php ./artisan user:create --password=$ABUSEIO_ADMIN_PASSWORD --first_name=system --last_name=administrator --language=en admin@isp.local Default
     echo $ABUSEIO_ADMIN_PASSWORD > $PASSWORDFILE
 
     # add the admin role to the user
