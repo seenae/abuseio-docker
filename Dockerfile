@@ -36,11 +36,11 @@ RUN curl -sS https://getcomposer.org/installer | php && \
 RUN composer config -g github-oauth.github.com ${GITHUB_TOKEN}
 
 # get AbuseIO
-RUN wget -O abuseio.zip https://github.com/AbuseIO/AbuseIO/archive/4.1.zip && \
+RUN wget -O abuseio.zip https://github.com/AbuseIO/AbuseIO/archive/master.zip && \
     unzip abuseio.zip -d /tmp
 
 # install dependencies
-WORKDIR /tmp/AbuseIO-4.1
+WORKDIR /tmp/AbuseIO-master
 RUN composer install --no-scripts
 
 # create the final image
@@ -173,7 +173,7 @@ RUN pecl install mailparse-3.0.2 && \
     phpenmod mailparse && phpenmod mcrypt
 
 # install AbuseIO from the intermediate image
-COPY --from=intermediate /tmp/AbuseIO-4.1 /opt/abuseio
+COPY --from=intermediate /tmp/AbuseIO-master /opt/abuseio
 RUN chown -R abuseio:abuseio /opt/abuseio
 
 WORKDIR /opt/abuseio

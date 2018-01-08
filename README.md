@@ -1,5 +1,5 @@
 # abuse-docker
-Standalone image for [AbuseIO 4.1](https://github.com/AbuseIO/AbuseIO/tree/4.1) running on NGINX with MySQL, fetchmail and procmail
+Standalone image for [AbuseIO 4.1](https://github.com/AbuseIO/AbuseIO) running on NGINX with MySQL, fetchmail and procmail
 
 ### to build
 The image uses composer and GitHub to retrieve its dependencies, you'll need to have a GitHub OATH token to retrieve them, you can get a OATH token on your GitHub profile. [GitHub Tokens](https://github.com/settings/tokens).
