@@ -147,7 +147,9 @@ RUN cp /usr/include/php/20151012/ext/mbstring/libmbfl/mbfl/mbfilter.h . && \
     mbfilter.h > /usr/include/php/20151012/ext/mbstring/libmbfl/mbfl/mbfilter.h
 
 # tweak php-fpm
-RUN sed -i -e "s/listen = \/run\/php\/php7.0-fpm.sock/listen = 127.0.0.1:9000/g" \
+RUN sed -i \
+    -e "s/listen = \/run\/php\/php7.0-fpm.sock/listen = 127.0.0.1:9000/g" \
+    -e "s/;clear_env = no/clear_env = no/g" \
     /etc/php/7.0/fpm/pool.d/www.conf
 
 # tweak rsyslog
